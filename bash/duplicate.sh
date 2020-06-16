@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 read -p "please enter a path : " var
 cd $var
 files=(*)
