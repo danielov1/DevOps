@@ -60,7 +60,7 @@ def createStackCF(metadataURL,appID):
         },
         {
             'ParameterKey': 'Metadata',
-            'ParameterValue': 'https://dev-45738533.okta.com/api/v1/apps/0oaar4suuYAHO1mGo5d6/sso/saml/metadata',
+            'ParameterValue': "'"+ metadataURL +"'",
             'UsePreviousValue': True
         },
         ],
