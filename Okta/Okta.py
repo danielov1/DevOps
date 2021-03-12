@@ -114,8 +114,8 @@ class Toplevel1:
 
         def submit():
             if Okta_support.accountNum.get() != "" and Okta_support.appNameAWS.get() != "" and Okta_support.keyid.get() != "" and Okta_support.secretKey.get() != "" and Okta_support.apiKey.get() != "":
-                messagebox.showinfo("Info","The application is running...")
-                Okta_support.startFunc()
+                messagebox.showinfo("Info","Checking Credentials...")
+                Okta_support.checkCredentials()
             else:
                 messagebox.showerror("Info","You must fill all the required fields")
 
@@ -245,8 +245,4 @@ class Toplevel1:
 
 if __name__ == '__main__':
     vp_start_gui()
-
-
-
-
 
