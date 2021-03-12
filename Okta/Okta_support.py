@@ -190,8 +190,7 @@ def createStackCF(metadataURL,appID):
 
             OKTAuserAccessKey = (stack.outputs[0]['OutputValue'])
             OKTAuserSecretKey = (stack.outputs[2]['OutputValue'])
-            root = tk.Tk()
-            root.mainloop()
+
             print("")
             print("")
             print("Next actions:")
