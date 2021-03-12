@@ -36,8 +36,7 @@ def set_Tk_var():
     apiKey = tk.StringVar()
 
 
-def create_window():
-    window = tk.Toplevel(root)
+oktaDomain = 'dev-45738533.okta.com'
 
 
 ## Check Credentials on Okta & AWS
@@ -56,7 +55,7 @@ def checkCredentials():
             'Authorization': 'SSWS '+ apiKey.get() +'',
             }
 
-        response = requests.get('https://dev-45738533.okta.com/api/v1/authorizationServers', headers=headers)
+        response = requests.get('https://'+ oktaDomain +'/api/v1/authorizationServers', headers=headers)
         if response.status_code == 200:
             messagebox.showinfo("Info","The application is running...")
             stack_exist_check()
@@ -159,7 +158,7 @@ def createStackCF(metadataURL,appID):
             'Authorization': 'SSWS '+ apiKey.get() +''}
 
         data = '{ "name": "amazon_aws", "label": "' + appNameAWS.get() + '", "settings": { "app": { "identityProviderArn":''"'+ receivedARN +'"'' } } }' #recivedARN value from stack output
-        response = requests.put('https://dev-45738533.okta.com/api/v1/apps/'+ appID +'', headers=headers, data=data)
+        response = requests.put('https://'+ oktaDomain +'/api/v1/apps/'+ appID +'', headers=headers, data=data)
 
         responseJson = json.loads(response)
         arnCheck = (responseJson['settings']['app']['identityProviderArn'])
@@ -173,7 +172,7 @@ def createStackCF(metadataURL,appID):
             'Content-Type': 'application/json',
             'Authorization': 'SSWS '+ apiKey.get() +''}
         data = '{ }'
-        response = requests.put('https://dev-45738533.okta.com/api/v1/apps/'+ appID +'/groups/' + finOpsGroup + '', headers=headers, data=data)
+        response = requests.put('https://'+ oktaDomain +'/api/v1/apps/'+ appID +'/groups/' + finOpsGroup + '', headers=headers, data=data)
 
 
         ## Check if ARN was updated
@@ -242,33 +241,28 @@ def startFunc():
         'Authorization': 'SSWS '+ apiKey.get() +''}
 
     data = '{ "name": "amazon_aws", "label": "' + appNameAWS.get() + '", "signOnMode": "SAML_2_0", "visibility":{ "autoSubmitToolbar":true, "hide":{ "iOS":false, "web":false } }, "credentials": { "userNameTemplate": { "template":"${source.email}", "type":"BUILT_IN" } }, "settings": { "app": { "requestIntegration": false, "loginURL": "https://'+accountNum.get()+'.signin.aws.amazon.com/console", "sessionDuration":43200 } } }'
-    response = requests.post('https://dev-45738533.okta.com/api/v1/apps', headers=headers, data=data)
+    response = requests.post('https://'+ oktaDomain +'/api/v1/apps', headers=headers, data=data)
     responseOrg = response.text
     sys.stdout.flush()
-    
-    ## Take metadata URL to variable
-
     responseJson = json.loads(responseOrg)
     
-    metadataURL = (responseJson['_links']['metadata']['href'])
-    appID = (responseJson['id'])
-    if id != "":
-        print("AWS linked account configured succesfully")
+    ## Check POST API call response
+
+    if response.status_code != 200:
+        errorMessage = responseJson["errorCauses"][0]["errorSummary"]
+        messagebox.showinfo("Info",errorMessage)
+        print(errorMessage)
     else:
-        print("AWS linked account configuration failed")
-        messagebox.showerror("Info","AWS linked account configuration failed")
-        print("")
-        print("")
-        print("No reasorce was configured")
-        sys.exit()
+        ## Take metadata URL to variable named metadataURL
 
-     
-    
-    ## Create Stack on CloudFormation
+        metadataURL = (responseJson['_links']['metadata']['href'])
+        appID = (responseJson['id'])
+        
+        ## Create Stack on CloudFormation
 
-    print("Execute createStackCF function")
-    
-    createStackCF(metadataURL,appID)
+        print("Execute createStackCF function")
+        
+        createStackCF(metadataURL,appID)
 
 # Function which closes the window.
 
