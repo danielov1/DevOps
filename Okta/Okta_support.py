@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import botocore
 import asyncio
 import boto3
 import requests
@@ -32,6 +33,34 @@ def set_Tk_var():
     secretKey = tk.StringVar()
     global apiKey
     apiKey = tk.StringVar()
+
+## Check Credentials
+def checkCredentials():
+    sts = boto3.client('sts',
+        aws_access_key_id=keyid.get(),
+        aws_secret_access_key=secretKey.get(),
+        region_name='us-east-1')
+
+    try:
+        sts.get_caller_identity()
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'SSWS '+ apiKey.get() +'',
+            }
+
+        response = requests.get('https://dev-45738533.okta.com/api/v1/authorizationServers', headers=headers)
+        if response.status_code == 200:
+            messagebox.showinfo("Info","The application is running...")
+            startFunc()
+        else:
+            messagebox.showerror("Info","Okta API token is invalid")
+            sys.exit()
+    except botocore.exceptions.ClientError:
+        messagebox.showerror("Info","AWS credentials are invalid")
+        sys.exit()
+
+
 
 ## Function Create Stack on CloudFormation
 def createStackCF(metadataURL,appID):
@@ -159,8 +188,8 @@ def createStackCF(metadataURL,appID):
     else:
         print(" ")
         print(" ")
-        print("Stack create is failed, please check on AWS CF events what the reason is")
-        messagebox.showerror("Info","Stack create is failed, please check on AWS CF events what the reason is")
+        print("Stack create is failed, please check on AWS CF events")
+        messagebox.showerror("Info","Stack create is failed, please check on AWS CF events")
         print("")
         print("")
         print("Resource created: ")
@@ -221,8 +250,4 @@ def destroy_window():
 if __name__ == '__main__':
     import Okta
     Okta.vp_start_gui()
-
-
-
-
 
