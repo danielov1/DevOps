@@ -8,6 +8,7 @@ import json
 import time
 import sys
 from tkinter import messagebox
+import tkinter as tk
 
 try:
     import Tkinter as tk
@@ -34,7 +35,13 @@ def set_Tk_var():
     global apiKey
     apiKey = tk.StringVar()
 
-## Check Credentials
+
+def create_window():
+    window = tk.Toplevel(root)
+
+
+## Check Credentials on Okta & AWS
+
 def checkCredentials():
     sts = boto3.client('sts',
         aws_access_key_id=keyid.get(),
@@ -52,26 +59,44 @@ def checkCredentials():
         response = requests.get('https://dev-45738533.okta.com/api/v1/authorizationServers', headers=headers)
         if response.status_code == 200:
             messagebox.showinfo("Info","The application is running...")
-            startFunc()
+            stack_exist_check()
         else:
             messagebox.showerror("Info","Okta API token is invalid")
-            sys.exit()
     except botocore.exceptions.ClientError:
         messagebox.showerror("Info","AWS credentials are invalid")
-        sys.exit()
+
+
+## Check if stack exist on CloudFormation
+
+def stack_exist_check():
+
+    client = boto3.client('cloudformation',
+    aws_access_key_id=keyid.get(),
+    aws_secret_access_key=secretKey.get(),
+    region_name='us-east-1')
+
+    try:
+        client.describe_stacks(StackName='CLDZE-ROLES')
+        messagebox.showinfo("Info","Stack already exist on CloudFormation")
+    except botocore.exceptions.ClientError as e:
+        if "does not exist" in e.response['Error']['Message']:
+            startFunc()
+        else:
+            raise e
 
 
 
 ## Function Create Stack on CloudFormation
+
 def createStackCF(metadataURL,appID):
     template = "https://s3-eu-west-1.amazonaws.com/cloudzone-external/CLDZE_ROLES.yaml"
 
     print("Creating a new stack on CloudFormation...")
-
+    
     client = boto3.client('cloudformation',
-        aws_access_key_id=keyid.get(),
-        aws_secret_access_key=secretKey.get(),
-        region_name='us-east-1')
+    aws_access_key_id=keyid.get(),
+    aws_secret_access_key=secretKey.get(),
+    region_name='us-east-1')
 
     response = client.create_stack(
         StackName='CLDZE-ROLES',
@@ -99,34 +124,33 @@ def createStackCF(metadataURL,appID):
         ],
     )
 
-    cfnr = boto3.resource('cloudformation',  
-        aws_access_key_id=keyid.get(),
-        aws_secret_access_key=secretKey.get(),
-        region_name='us-east-1')
 
-    stack = cfnr.Stack('CLDZE-ROLES')
-
-    i = 0
-    STACK_NAME = 'CLDZE-ROLES'
-    
     ## Check if the task was created succefully
 
+    stackResource = boto3.resource('cloudformation',  
+    aws_access_key_id=keyid.get(),
+    aws_secret_access_key=secretKey.get(),
+    region_name='us-east-1')
+
+    stack = stackResource.Stack('CLDZE-ROLES')
+    i = 0
     while stack.stack_status == 'CREATE_IN_PROGRESS':
         i = i+1
         print("Stack create state is CREATE_IN_PROGRESS")
         if(i>10):
             break
         time.sleep(10)
-        stack = cfnr.Stack('CLDZE-ROLES')
+        stack = stackResource.Stack('CLDZE-ROLES')
         
     if stack.stack_status == 'CREATE_COMPLETE':
         print(" ")
         print(" ")
         print("Stack create completed")
-        response = client.list_stack_resources(StackName=STACK_NAME)
+        response = client.list_stack_resources(StackName='CLDZE-ROLES')
         receivedARN = response["StackResourceSummaries"][3]['PhysicalResourceId']
 
         ## Update Identity Provider ARN for SAML SSO on Okta
+
         print("Updating " + appNameAWS.get() + " account ARN...")
 
         headers = {
@@ -164,8 +188,11 @@ def createStackCF(metadataURL,appID):
             print("ARN configured on '" + appNameAWS.get() + "'")
 
             ## Next actions which can't be automated
+
             OKTAuserAccessKey = (stack.outputs[0]['OutputValue'])
             OKTAuserSecretKey = (stack.outputs[2]['OutputValue'])
+            root = tk.Tk()
+            root.mainloop()
             print("")
             print("")
             print("Next actions:")
@@ -197,14 +224,16 @@ def createStackCF(metadataURL,appID):
         sys.exit()
 
 
+
 def init(top, gui, *args, **kwargs):
     global w, top_level, root
     w = gui
     top_level = top
     root = top
 
+## Create AWS Application on Okta
+
 def startFunc():
-    ## Create AWS Application on Okta
     print("Creating AWS linked account on Okta...")
 
     headers = {
@@ -232,7 +261,8 @@ def startFunc():
         print("")
         print("No reasorce was configured")
         sys.exit()
-        
+
+     
     
     ## Create Stack on CloudFormation
 
@@ -250,4 +280,8 @@ def destroy_window():
 if __name__ == '__main__':
     import Okta
     Okta.vp_start_gui()
+
+
+
+
 
