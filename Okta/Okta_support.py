@@ -106,7 +106,6 @@ def stack_exist_check():
             raise e
     
 
-
 ## A function that create Stack on CloudFormation
 
 def createStackCF(metadataURL,appID):
@@ -219,8 +218,6 @@ def createStackCF(metadataURL,appID):
             print("Secret key: '" + OKTAuserSecretKey +"")
             openNewWindow(OKTAuserAccessKey,OKTAuserSecretKey)
 
-        
-
         else:
             print("ARN update failed")
             messagebox.showerror("Info","ARN update failed")
@@ -239,7 +236,6 @@ def createStackCF(metadataURL,appID):
         print("")
         print("Resource created: ")
         print("AWS linked account")
-
 
 
 def init(top, gui, *args, **kwargs):
@@ -267,7 +263,6 @@ async def skipFunc(oktaDomain):
                 appID = (appJson['id'])
                 createStackCF(metadataURL,appID)
     
-
 
 ## Create AWS Application on Okta and call createStackCF func, if the application already exists on Okta prompt for skip creating Okta's application 
 
