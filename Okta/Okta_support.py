@@ -74,6 +74,7 @@ def checkCredentials():
         if response.status_code == 200:
             
             ## Check application name validation and call to stack_exist_check func
+            
             pattern = re.compile("(\w*)-(\d*)")
             appNameCheck = str(pattern.search(appNameAWS.get()))
             if appNameCheck == "None":
