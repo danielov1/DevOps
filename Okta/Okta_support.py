@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-
 import botocore
 import asyncio
 import boto3
 import requests
 import json
 import time
+from okta.client import Client as OktaClient
 import sys
 from tkinter import messagebox
 from botocore.exceptions import ClientError
 from tkinter import *
 import ast
 import asyncio
-from okta.client import Client as OktaClient
+import re
 
 try:
     import Tkinter as tk
@@ -72,8 +72,15 @@ def checkCredentials():
 
         response = requests.get(oktaDomain +'/api/v1/authorizationServers', headers=headers)
         if response.status_code == 200:
-            messagebox.showinfo("Info","The application is running...")
-            stack_exist_check()
+            
+            ## Check application name
+            pattern = re.compile("(\w*)-(\d*)")
+            appNameCheck = str(pattern.search(appNameAWS.get()))
+            if appNameCheck == "None":
+                messagebox.showinfo("Info","Application name is invalid, Application name must contains <cust_name>-<account_num>")
+            else:
+                messagebox.showinfo("Info","The application is running...")
+                stack_exist_check()
         else:
             messagebox.showerror("Info","Okta API token is invalid")
     except botocore.exceptions.ClientError:
