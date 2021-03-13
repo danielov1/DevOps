@@ -73,7 +73,7 @@ def checkCredentials():
         response = requests.get(oktaDomain +'/api/v1/authorizationServers', headers=headers)
         if response.status_code == 200:
             
-            ## Check application name
+            ## Check application name validation and call to stack_exist_check func
             pattern = re.compile("(\w*)-(\d*)")
             appNameCheck = str(pattern.search(appNameAWS.get()))
             if appNameCheck == "None":
@@ -87,7 +87,7 @@ def checkCredentials():
         messagebox.showerror("Info","AWS credentials are invalid")
 
 
-## Check if stack exists on CloudFormation
+## Check if stack exists on CloudFormation and call to startFunc func
 
 def stack_exist_check():
 
@@ -107,7 +107,7 @@ def stack_exist_check():
     
 
 
-## Function Create Stack on CloudFormation
+## A function that create Stack on CloudFormation
 
 def createStackCF(metadataURL,appID):
     template = "https://s3-eu-west-1.amazonaws.com/cloudzone-external/CLDZE_ROLES.yaml"
@@ -249,7 +249,7 @@ def init(top, gui, *args, **kwargs):
     root = top
 
 
-## Function that take metadata & application ID vars
+## A function that takes metadata & application ID vars and call to createStackCF func
 
 async def skipFunc(oktaDomain):
     configOkta = {
@@ -269,7 +269,7 @@ async def skipFunc(oktaDomain):
     
 
 
-## Create AWS Application on Okta
+## Create AWS Application on Okta and call createStackCF func, if the application already exists on Okta prompt for skip creating Okta's application 
 
 def startFunc():
     print("Creating AWS linked account on Okta...")
@@ -294,7 +294,7 @@ def startFunc():
         msgBox = tk.messagebox.askquestion ('Info','Proccess anyway and run a Stack on CloudFormation',icon = 'warning')
         if msgBox == 'yes':
 
-            ## Execute function that skip app creation on Okta and take metadata & application ID vars
+            ## Execute function that skips app creation on Okta and take metadata & application ID vars
 
             loop = asyncio.get_event_loop()
             loop.run_until_complete(skipFunc(oktaDomain))
