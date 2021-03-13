@@ -8,7 +8,11 @@ import json
 import time
 import sys
 from tkinter import messagebox
-import tkinter as tk
+from botocore.exceptions import ClientError
+from tkinter import *
+import ast
+import asyncio
+from okta.client import Client as OktaClient
 
 try:
     import Tkinter as tk
@@ -36,8 +40,20 @@ def set_Tk_var():
     apiKey = tk.StringVar()
 
 
-oktaDomain = 'dev-45738533.okta.com'
+oktaDomain = 'https://dev-45738533.okta.com'
 
+
+## Open a new windows for next action plan
+
+def openNewWindow(OKTAuserSecretKey,OKTAuserAccessKey):
+    master = Tk() 
+    master.geometry("200x200") 
+    label = Label(master,  
+                text ='The following actions must be configured menually: \n\n1. configure Provisioning on ' + appNameAWS.get() + 'linked account using the following Access & Secret keys(printed on terminal also):\n Access key: ' + OKTAuserAccessKey +'\n Secret key: ' + OKTAuserSecretKey +'\n - Click "Configure API Integration"\n - Enable "Create Users"\n\n 2. configure MFA Policy on ' + appNameAWS.get() + ' linked account\n - Select “Add Rule”- Rule Name: MFA Select Prompt for factor> Once per session Click Save', anchor="e", justify=LEFT, font='freesansbold')
+    label.pack(pady = 10)
+    master.title('Next actions')
+    master.minsize(800,300)
+    mainloop()
 
 ## Check Credentials on Okta & AWS
 
@@ -52,10 +68,9 @@ def checkCredentials():
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': 'SSWS '+ apiKey.get() +'',
-            }
+            'Authorization': 'SSWS '+ apiKey.get()}
 
-        response = requests.get('https://'+ oktaDomain +'/api/v1/authorizationServers', headers=headers)
+        response = requests.get(oktaDomain +'/api/v1/authorizationServers', headers=headers)
         if response.status_code == 200:
             messagebox.showinfo("Info","The application is running...")
             stack_exist_check()
@@ -65,7 +80,7 @@ def checkCredentials():
         messagebox.showerror("Info","AWS credentials are invalid")
 
 
-## Check if stack exist on CloudFormation
+## Check if stack exists on CloudFormation
 
 def stack_exist_check():
 
@@ -82,7 +97,7 @@ def stack_exist_check():
             startFunc()
         else:
             raise e
-
+    
 
 
 ## Function Create Stack on CloudFormation
@@ -113,7 +128,7 @@ def createStackCF(metadataURL,appID):
         },
         {
             'ParameterKey': 'Metadata',
-            'ParameterValue': "'"+ metadataURL +"'",
+            'ParameterValue': metadataURL,
             'UsePreviousValue': True
         },
         ],
@@ -124,7 +139,7 @@ def createStackCF(metadataURL,appID):
     )
 
 
-    ## Check if the task was created succefully
+    ## Check if the task was created successfully
 
     stackResource = boto3.resource('cloudformation',  
     aws_access_key_id=keyid.get(),
@@ -138,7 +153,7 @@ def createStackCF(metadataURL,appID):
         print("Stack create state is CREATE_IN_PROGRESS")
         if(i>10):
             break
-        time.sleep(10)
+        time.sleep(13)
         stack = stackResource.Stack('CLDZE-ROLES')
         
     if stack.stack_status == 'CREATE_COMPLETE':
@@ -155,10 +170,10 @@ def createStackCF(metadataURL,appID):
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': 'SSWS '+ apiKey.get() +''}
+            'Authorization': 'SSWS '+ apiKey.get()}
 
         data = '{ "name": "amazon_aws", "label": "' + appNameAWS.get() + '", "settings": { "app": { "identityProviderArn":''"'+ receivedARN +'"'' } } }' #recivedARN value from stack output
-        response = requests.put('https://'+ oktaDomain +'/api/v1/apps/'+ appID +'', headers=headers, data=data)
+        response = requests.put(oktaDomain +'/api/v1/apps/'+ appID +'', headers=headers, data=data)
 
         responseJson = json.loads(response)
         arnCheck = (responseJson['settings']['app']['identityProviderArn'])
@@ -170,9 +185,9 @@ def createStackCF(metadataURL,appID):
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': 'SSWS '+ apiKey.get() +''}
+            'Authorization': 'SSWS '+ apiKey.get() }
         data = '{ }'
-        response = requests.put('https://'+ oktaDomain +'/api/v1/apps/'+ appID +'/groups/' + finOpsGroup + '', headers=headers, data=data)
+        response = requests.put(oktaDomain +'/api/v1/apps/'+ appID +'/groups/' + finOpsGroup + '', headers=headers, data=data)
 
 
         ## Check if ARN was updated
@@ -184,20 +199,19 @@ def createStackCF(metadataURL,appID):
             print("Resource created: ")
             print("AWS linked account")
             print("AWS stack on CloudFormation")
-            print("ARN configured on '" + appNameAWS.get() + "'")
+            print("ARN & Finops group were added to" + appNameAWS.get() + " app")
 
             ## Next actions which can't be automated
 
             OKTAuserAccessKey = (stack.outputs[0]['OutputValue'])
             OKTAuserSecretKey = (stack.outputs[2]['OutputValue'])
+            print("")
+            print("")
+            print("Access & Secret keys:")
+            print("Access key: '" + OKTAuserAccessKey +"")
+            print("Secret key: '" + OKTAuserSecretKey +"")
+            openNewWindow(OKTAuserAccessKey,OKTAuserSecretKey)
 
-            print("")
-            print("")
-            print("Next actions:")
-            print("1. configure Provisioning on '" + appNameAWS.get() + "' linked account using the following Access & Secret keys:")
-            print("Access key: '" + OKTAuserAccessKey +"' ")
-            print("Secret key: '" + OKTAuserSecretKey +"' ")
-            print("2. configure MFA Policy on '" + appNameAWS.get() + "' linked account")
         
 
         else:
@@ -208,7 +222,6 @@ def createStackCF(metadataURL,appID):
             print("Resource created: ")
             print("AWS linked account")
             print("AWS stack on CloudFormation")
-            sys.exit()
 
     else:
         print(" ")
@@ -219,7 +232,6 @@ def createStackCF(metadataURL,appID):
         print("")
         print("Resource created: ")
         print("AWS linked account")
-        sys.exit()
 
 
 
@@ -229,6 +241,27 @@ def init(top, gui, *args, **kwargs):
     top_level = top
     root = top
 
+
+## Function that take metadata & application ID vars
+
+async def skipFunc(oktaDomain):
+    configOkta = {
+    'orgUrl': oktaDomain,
+    'token': apiKey.get()}
+    okta_client = OktaClient(configOkta)
+    apps, resp, err = await okta_client.list_applications()
+    for app in apps:
+        appsList = (app.label,app.id)
+        for app.label in appsList:
+            if app.label == appNameAWS.get():
+                strApp = str(app)
+                appJson = ast.literal_eval(strApp)
+                metadataURL = (appJson['links']['metadata']['href'])
+                appID = (appJson['id'])
+                createStackCF(metadataURL,appID)
+    
+
+
 ## Create AWS Application on Okta
 
 def startFunc():
@@ -237,10 +270,10 @@ def startFunc():
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': 'SSWS '+ apiKey.get() +''}
+        'Authorization': 'SSWS '+ apiKey.get()}
 
     data = '{ "name": "amazon_aws", "label": "' + appNameAWS.get() + '", "signOnMode": "SAML_2_0", "visibility":{ "autoSubmitToolbar":true, "hide":{ "iOS":false, "web":false } }, "credentials": { "userNameTemplate": { "template":"${source.email}", "type":"BUILT_IN" } }, "settings": { "app": { "requestIntegration": false, "loginURL": "https://'+accountNum.get()+'.signin.aws.amazon.com/console", "sessionDuration":43200 } } }'
-    response = requests.post('https://'+ oktaDomain +'/api/v1/apps', headers=headers, data=data)
+    response = requests.post(oktaDomain +'/api/v1/apps', headers=headers, data=data)
     responseOrg = response.text
     sys.stdout.flush()
     responseJson = json.loads(responseOrg)
@@ -251,6 +284,17 @@ def startFunc():
         errorMessage = responseJson["errorCauses"][0]["errorSummary"]
         messagebox.showinfo("Info",errorMessage)
         print(errorMessage)
+        msgBox = tk.messagebox.askquestion ('Info','Proccess anyway and run a Stack on CloudFormation',icon = 'warning')
+        if msgBox == 'yes':
+
+            ## Execute function that skip app creation on Okta and take metadata & application ID vars
+
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(skipFunc(oktaDomain))
+
+        else:
+            tk.messagebox.showinfo('Return','You will now return to the application screen')
+        
     else:
         ## Take metadata URL to variable named metadataURL
 
