@@ -49,7 +49,7 @@ for item in items:
     startTimels = list(item.Arm())[2]
     endTimels = list(item.Arm())[3]
     rotationNamels = list(item.Arm())[4]
-    RotationIDls = list(item.Arm())[5]
+    rotationIDls = list(item.Arm())[5]
     namels = list(item.Arm())[6]
     userls = list(item.Arm())[7]
 
@@ -88,7 +88,7 @@ for item in items:
 
     data = ' { "name": "'+ rotationNamels +'", "startDate": "'+ my_startDate +'T'+ my_startTime + 'Z", "endDate": "'+ my_endDate +'T'+ my_endTime + 'Z", "type": "daily", "length": 1, "participants": [ { "type": "user", "username": "'+ userls +'" } ] }'
 
-    response = requests.patch('https://api.eu.opsgenie.com/v2/schedules/<Schedule-ID>/rotations/'+ RotationIDls +'', headers=headers, data=data)   
+    response = requests.patch('https://api.eu.opsgenie.com/v2/schedules/<Schedule-ID>/rotations/'+ rotationIDls +'', headers=headers, data=data)   
     responseOrg = response.text
     sys.stdout.flush()
     responseJson = json.loads(responseOrg)
