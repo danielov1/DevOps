@@ -24,7 +24,7 @@ class Arm(object):
         return[self.StartDate, self.EndDate, self.startTime, self.endTime, self.RotationName, self.RotationID, self.Name, self.User]
 
 ## Open Excel file
-loc = '~/Desktop/opsgenie/shifts.xlsx'
+loc = 'file.xlsx'
 wb = open_workbook(loc)
 
 ## Read from Excel file and call to Class named Arm
