@@ -9,9 +9,9 @@ from pytz import timezone
 import datetime
 import pytz
 
-loc = '~/Desktop/opsgenie/shifts.xlsx'
-schedule_id = 'c3f9e3b6-d717-424b-8085-5dfad8b4560e'
-genie_token = 'f0c1430d-ee72-4dcc-ab49-e76b01d3ec75'
+loc = 'excel.xlsx'
+schedule_id = '<schedule-id>'
+genie_token = '<token-id>'
 
 def prefix_time(x):
     x = list(x)
