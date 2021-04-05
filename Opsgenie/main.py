@@ -103,8 +103,6 @@ def sort_df(rotation_name, rotation_id):
 
     ## PATCH API call that update the schedule
     
-    print(my_start_date_split,my_start_time_split)
-    print(my_end_date_split,my_end_time_split)
 
     headers = {
         'Authorization': 'GenieKey '+ genie_token,
@@ -118,10 +116,10 @@ def sort_df(rotation_name, rotation_id):
     sys.stdout.flush()
     response_json = json.loads(response_Org)
     print(response_json)
-    print(data)
     
 
 ## Read excel file to Dataframe
+
 df = pd.read_excel(loc)
 df = df.groupby(['RotationName', 'RotationID']).agg(tuple).reset_index()
 
