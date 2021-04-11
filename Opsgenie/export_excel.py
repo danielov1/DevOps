@@ -24,7 +24,7 @@ datetime_object = datetime.datetime.strptime(month_num_str, "%m")
 full_month_name = datetime_object.strftime("%B")
 
 ## Create file named by the next month name
-file_loc = '~/Desktop/opsgenie/'+full_month_name+'.xlsx'
+file_loc = 'path/'+full_month_name+'.xlsx'
 
 
 num_days_in_month = calendar.monthrange(current_year, current_month)[1]
