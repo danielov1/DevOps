@@ -9,9 +9,9 @@ from pytz import timezone
 import datetime
 import pytz
 
-loc = 'excel.xlsx'
-schedule_id = '<schedule-id>'
-genie_token = '<token-id>'
+loc = '<Excel-Path>'
+schedule_id = '<Schedule-id>'
+genie_token = '<Token>'
 
 def prefix_time(x):
     x = list(x)
@@ -29,8 +29,10 @@ def prefix_time(x):
 
 def change_time(m_date, m_time):
     time_zone = timezone('Asia/Jerusalem')
+    m_date = m_date.replace('/','-')
     my_time = m_date + " " + m_time
-    changed_time = time_zone.localize(datetime.datetime.strptime(my_time, '%Y-%m-%d %H:%M:%S')).astimezone(pytz.utc)
+
+    changed_time = time_zone.localize(datetime.datetime.strptime(my_time, '%d-%m-%Y %H:%M:%S')).astimezone(pytz.utc)
 
     changed_time = str(changed_time)
     changed_time = changed_time[:-6]
@@ -50,21 +52,19 @@ def sort_df(rotation_name, rotation_id):
     end_time_list = []
 
     df = pd.read_excel(loc)
-
-    rslt_df = df[df["RotationName"] == rotation_name] 
-    df = rslt_df.groupby(['StartDate', 'StartTime', 'EndDate', 'EndTime', 'RotationID', 'Users']).agg(tuple).reset_index()
-    # print(df)
+    rslt_df = df[df["RotationName"] == rotation_name]
+    df = rslt_df.groupby(['StartDate', 'StartTime', 'EndDate', 'EndTime', 'User']).agg(tuple).reset_index()
+    
     for record in df.to_dict(orient='records'):
-        
         start_date_list.append(str(record['StartDate']).split()[0])
         start_time_list.append(str(record['StartTime']))
         end_date_list.append(str(record['EndDate']).split()[0])
         end_time_list.append(str(record['EndTime']))
-        user_list.append(str(record['Users']))
-
+        user_list.append(str(record['User']))
+    
 
     ## Get the first Start Date and the first Start Time
-
+    #print(start_date_list)
     start_date = start_date_list[0]
     start_time = start_time_list[0]
     prefix_start_time_h = start_time.split(":")[0]
@@ -116,7 +116,6 @@ def sort_df(rotation_name, rotation_id):
     sys.stdout.flush()
     response_json = json.loads(response_Org)
     print(response_json)
-    
 
 ## Read excel file to Dataframe
 
