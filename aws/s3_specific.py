@@ -9,14 +9,14 @@ import datetime
 client = boto3.client('s3')
 s3 = boto3.resource('s3')
 
-bucket = s3.Bucket('test-cldze')
+bucket = s3.Bucket('<bucket-name>')
 start_foldernum = '1000'
 end_foldernum = '1004'
 
 start_int = int(start_foldernum)
 end_int = int(end_foldernum)
 
-file_loc = "logzio-ec-aws-logs-archive/s3.log"
+file_loc = "<bucket-name>"
 
 s3_log = open("s3.log", "a")
 now = datetime.datetime.now()
@@ -30,7 +30,7 @@ for obj in bucket.objects.all():
                 now = datetime.datetime.now()
                 print(now, " ", obj.key, file=open(file_loc, "a"))
                 response = client.restore_object(
-                Bucket='logzio-ec-aws-logs-archive',
+                Bucket='<bucket-name>',
                 Key=obj.key,
                 RestoreRequest={'Days': 7, 'GlacierJobParameters': {'Tier': 'Standard'}})
                 i = i + 1
