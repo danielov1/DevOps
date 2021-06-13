@@ -21,6 +21,7 @@ for obj in bucket.objects.all():
         if obj.key.startswith('/'):
             continue
         else:
+            now = datetime.datetime.now()
             response = client.restore_object(
             Bucket='<bucket-name>',
             Key=obj.key,
@@ -32,5 +33,6 @@ for obj in bucket.objects.all():
             raise error
             continue
 
+now = datetime.datetime.now()
 print(now, " ", "finished", file=open("s3.log", "a"))
 print(now, " ", "total files count is:", i, file=open("s3.log", "a"))
