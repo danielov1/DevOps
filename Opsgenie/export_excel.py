@@ -33,7 +33,6 @@ response_json = json.loads(response_Org)
 total_count = int(response_json['totalCount'])
 
 
-
 ## Check what is the current date
 
 now = datetime.datetime.now()
