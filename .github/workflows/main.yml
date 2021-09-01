@@ -30,19 +30,21 @@ jobs:
           branch_name=$(basename $GITHUB_REF)
 
           env_name=''
-
+          
+          echo ${branch_name}
+          
           if [[ branch_name == "master" ]]; then
             env_name='prod'
+            echo ${env_name}
 
           elif [[ branch_name == "david" ]]; then
             env_name='staging'
-
+            echo ${env_name}
           else
             exit 1
 
           fi
 
-          echo ${env_name} 
       - name: Update
         run: |
           echo ${env_name} 
