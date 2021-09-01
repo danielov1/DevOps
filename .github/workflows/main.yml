@@ -20,9 +20,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -39,7 +36,7 @@ jobs:
             exit 1
           fi
           
-          echo $env_name >> $env_name
+          echo "env_name=$env_name" >> $GITHUB_ENV
       - name: Run a multi-line script
         run: |
           echo "${{env.env_name}}"
