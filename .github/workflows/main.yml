@@ -41,5 +41,6 @@ jobs:
             echo "The variable is dev."
           else
             echo "The variable exit."
+            exit 1
           fi
 
