@@ -29,17 +29,19 @@ jobs:
         run: |
           branch_name=$(basename $GITHUB_REF)
 
-          echo $branch_name
-
           if [[ $branch_name = "master" ]];
           then
             env_name='prod'
-            echo "The variable is master."
           elif [[ $branch_name = "dev" ]];
           then
             env_name='staging'
-            echo "The variable is dev."
           else
-            echo "The variable exit."
             exit 1
           fi
+          
+          echo "::set-env name=env_name::$env_name"
+      - name: Run a multi-line script
+        run: |
+          echo $env_name
+          
+          
