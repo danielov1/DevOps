@@ -33,12 +33,12 @@ jobs:
           
           echo ${branch_name}
           
-          if [[ branch_name == "master" ]]; then
+          if [[ branch_name = "master" ]]; then
             env_name='prod'
             echo ${env_name}
             
           
-          elif [[ branch_name == "david" ]]; then
+          elif [[ branch_name = "david" ]]; then
             env_name='staging'
             echo ${env_name}
             
