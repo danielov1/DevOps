@@ -20,6 +20,7 @@ genie_token = <api-teken>
 
 url = "https://api.eu.opsgenie.com/v2/users/?query=skypeUsername=NOC"
 
+
 payload={}
 headers = {
   'Authorization': 'GenieKey '+ genie_token,
