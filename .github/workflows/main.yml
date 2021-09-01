@@ -36,16 +36,13 @@ jobs:
           if [[ branch_name == "master" ]]; then
             env_name='prod'
             echo ${env_name}
-
-          elif [[ branch_name == "david" ]]; then
+          fi
+          
+          if [[ branch_name == "david" ]]; then
             env_name='staging'
             echo ${env_name}
-          else
-            exit 1
-            
           fi
 
-          fi
 
       - name: Update
         run: |
