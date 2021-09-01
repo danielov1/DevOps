@@ -42,7 +42,7 @@ jobs:
           echo $env_name >> $env_name
       - name: Run a multi-line script
         run: |
-          echo "{{env.env_name}}"
+          echo "${{env.env_name}}"
           echo $env_name
           
           
