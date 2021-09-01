@@ -29,21 +29,17 @@ jobs:
         run: |
           branch_name=$(basename $GITHUB_REF)
 
-          env_name=''
-          
-          echo ${branch_name}
-          
-          if [[ branch_name = "master" ]]; then
+          echo $branch_name
+
+          if [[ $branch_name = "master" ]];
+          then
             env_name='prod'
-            echo ${env_name}
-            
-          
-          elif [[ branch_name = "david" ]]; then
+            echo "The variable is master."
+          elif [[ $branch_name = "dev" ]];
+          then
             env_name='staging'
-            echo ${env_name}
-            
+            echo "The variable is dev."
           else
-            exit 1
-          
+            echo "The variable exit."
           fi
 
