@@ -39,7 +39,7 @@ jobs:
             exit 1
           fi
           
-          echo "::set-env name=env_name::$env_name"
+          echo $env_name >> $env_name
       - name: Run a multi-line script
         run: |
           echo $env_name
