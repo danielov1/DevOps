@@ -28,4 +28,15 @@ jobs:
       - name: Run a multi-line script
         run: |
           branch_name=$(basename $GITHUB_REF)
-          echo $branch_name
+          env_name=''
+          if [[ branch_name == "master" ]]; then
+            env_name='prod'
+          elif [[ branch_name == "david" ]]; then
+            env_name='staging'
+          else
+            exit 1
+          fi
+          echo ${env_name} 
+      - name: Update
+        run: |
+          echo ${env_name} 
